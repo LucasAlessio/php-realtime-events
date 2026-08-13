@@ -1,0 +1,30 @@
+{
+  "name": "realtime-events",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.21.0",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm --filter @realtime-events/contracts run build && pnpm --filter @realtime-events/server run dev",
+    "dev:playground": "pnpm --filter @realtime-events/contracts run build && pnpm --filter @realtime-events/playground run dev",
+    "emit": "pnpm --filter @realtime-events/playground run emit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "pnpm --filter @realtime-events/contracts run build && pnpm -r run typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@types/node": "^22.10.7",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.4"
+  }
+}

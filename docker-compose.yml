@@ -1,0 +1,37 @@
+services:
+  realtime-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: "4000"
+      INGEST_HMAC_SECRET: ${INGEST_HMAC_SECRET:?defina INGEST_HMAC_SECRET no .env}
+      INGEST_TIMESTAMP_TOLERANCE_SECONDS: ${INGEST_TIMESTAMP_TOLERANCE_SECONDS:-300}
+      MAX_BODY_BYTES: ${MAX_BODY_BYTES:-1048576}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      # Descomente junto com o serviço `redis` abaixo para rodar múltiplos
+      # nós do servidor atrás de um load balancer:
+      # REDIS_URL: redis://redis:6379
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    # depends_on:
+    #   redis:
+    #     condition: service_healthy
+
+  # Só é necessário ao escalar para mais de um nó do servidor (ver
+  # REDIS_URL acima). Com 1 nó, o Socket.IO usa seu adapter em memória.
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 5
