@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" role="img" aria-labelledby="rt-title rt-desc">
+  <title id="rt-title">Realtime Notification Pipeline</title>
+  <desc id="rt-desc">Either a partner webhook or an internal PHP action signs and posts an event to the same HTTP endpoint. The realtime server validates it, resolves which Socket.IO rooms should receive it by tenant, user, or entity, and pushes a live update only to browser sessions in a matching room — sessions outside those rooms receive nothing.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="640" fill="#ffffff" />
+
+  <text x="700" y="36" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">Realtime Notification Pipeline</text>
+  <text x="700" y="58" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#6b7280">From a PHP-side event to a live browser update</text>
+
+  <!-- Partner (external) -->
+  <rect x="20" y="205" width="140" height="85" rx="8" fill="#f9fafb" stroke="#9ca3af" stroke-width="1.5" />
+  <text x="90" y="235" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">Third-Party</text>
+  <text x="90" y="253" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">Partner</text>
+  <text x="90" y="275" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#6b7280">(external system)</text>
+
+  <!-- PHP: partner webhook -->
+  <rect x="260" y="200" width="210" height="95" rx="8" fill="#f9fafb" stroke="#9ca3af" stroke-width="1.5" />
+  <text x="365" y="228" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">PHP Backend</text>
+  <text x="365" y="248" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#4b5563">webhook from partner</text>
+  <text x="365" y="266" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-style="italic" fill="#6b7280">receives it and forwards</text>
+
+  <!-- PHP: internal action, no partner involved -->
+  <rect x="260" y="330" width="210" height="95" rx="8" fill="#f9fafb" stroke="#9ca3af" stroke-width="1.5" />
+  <text x="365" y="358" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#1f2937">PHP Backend</text>
+  <text x="365" y="378" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#4b5563">internal action</text>
+  <text x="365" y="396" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-style="italic" fill="#6b7280">service / job / cron — no partner</text>
+
+  <!-- Arrow: Partner -> PHP webhook -->
+  <line x1="162" y1="247" x2="258" y2="247" stroke="#475569" stroke-width="1.75" marker-end="url(#arrow)" />
+  <text x="210" y="232" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10.5" fill="#4b5563">webhook</text>
+
+  <!-- Arrows: both PHP paths -> Core (converge on the same endpoint) -->
+  <line x1="472" y1="247" x2="598" y2="283" stroke="#475569" stroke-width="1.75" marker-end="url(#arrow)" />
+  <line x1="472" y1="378" x2="598" y2="299" stroke="#475569" stroke-width="1.75" marker-end="url(#arrow)" />
+  <text x="535" y="205" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#4b5563">POST /internal/emit</text>
+  <text x="535" y="219" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#4b5563">+ HMAC signature</text>
+  <text x="535" y="233" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-style="italic" fill="#9ca3af">(same endpoint, either origin)</text>
+
+  <!-- Core container -->
+  <rect x="600" y="100" width="380" height="380" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="2" />
+  <text x="790" y="130" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#4338ca">Realtime Events Server</text>
+  <text x="790" y="148" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#6366f1">(this project)</text>
+
+  <!-- Step 1 -->
+  <rect x="620" y="165" width="340" height="60" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.5" />
+  <text x="790" y="190" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#1f2937">1  Validate envelope</text>
+  <text x="790" y="209" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#4b5563">against the type registry</text>
+
+  <line x1="790" y1="225" x2="790" y2="243" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)" />
+  <text x="805" y="238" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="9" font-style="italic" fill="#6b7280">known type</text>
+
+  <!-- Step 2 -->
+  <rect x="620" y="245" width="340" height="60" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.5" />
+  <text x="790" y="270" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#1f2937">2  Resolve audience → rooms</text>
+  <text x="790" y="289" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#4b5563">tenant / user / entity</text>
+
+  <line x1="790" y1="305" x2="790" y2="323" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)" />
+  <text x="805" y="318" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="9" font-style="italic" fill="#6b7280">target rooms</text>
+
+  <!-- Step 3 -->
+  <rect x="620" y="325" width="340" height="60" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.5" />
+  <text x="790" y="350" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12.5" font-weight="600" fill="#1f2937">3  Publish via Socket.IO</text>
+  <text x="790" y="369" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#4b5563">io.to(rooms).emit(...)</text>
+
+  <!-- Extensibility callout -->
+  <rect x="620" y="400" width="340" height="55" rx="6" fill="#ffffff" stroke="#6366f1" stroke-width="1.25" stroke-dasharray="4 4" />
+  <text x="790" y="422" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#4338ca">New notification type = new schema file</text>
+  <text x="790" y="439" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#4b5563">no changes to server, auth, or routing</text>
+
+  <!-- Client container -->
+  <rect x="1070" y="100" width="300" height="380" rx="10" fill="#ecfdf5" stroke="#059669" stroke-width="2" />
+  <text x="1220" y="130" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#047857">Browser Clients</text>
+  <text x="1220" y="148" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#059669">(React, via Socket.IO)</text>
+
+  <!-- Client 1 -->
+  <rect x="1090" y="165" width="260" height="90" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.5" />
+  <text x="1220" y="187" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#1f2937">User A — Tenant 12</text>
+  <text x="1220" y="206" text-anchor="middle" font-family="monospace" font-size="10.5" fill="#047857">tenant:12</text>
+  <text x="1220" y="224" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-style="italic" fill="#6b7280">sees: tenant-wide alerts</text>
+
+  <!-- Client 2 -->
+  <rect x="1090" y="270" width="260" height="90" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.5" />
+  <text x="1220" y="292" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#1f2937">User B — Tenant 12</text>
+  <text x="1220" y="311" text-anchor="middle" font-family="monospace" font-size="10.5" fill="#047857">tenant:12:user:45</text>
+  <text x="1220" y="329" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-style="italic" fill="#6b7280">sees: alerts addressed to them</text>
+
+  <!-- Client 3 -->
+  <rect x="1090" y="375" width="260" height="90" rx="6" fill="#ffffff" stroke="#059669" stroke-width="1.5" />
+  <text x="1220" y="397" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#1f2937">User C — Tenant 12</text>
+  <text x="1220" y="416" text-anchor="middle" font-family="monospace" font-size="10" fill="#047857">tenant:12:order:987</text>
+  <text x="1220" y="434" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-style="italic" fill="#6b7280">viewing order #987 — live update</text>
+
+  <!-- Fan-out arrows: core step3 -> clients -->
+  <line x1="960" y1="355" x2="1088" y2="210" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)" />
+  <line x1="960" y1="355" x2="1088" y2="315" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)" />
+  <line x1="960" y1="355" x2="1088" y2="420" stroke="#475569" stroke-width="1.5" marker-end="url(#arrow)" />
+
+  <!-- Delivery rule: dedicated clear band between the containers and the caption -->
+  <text x="985" y="508" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#374151">delivered only to rooms with a match — clients outside those rooms receive nothing</text>
+
+  <!-- Caption -->
+  <text x="700" y="555" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#374151">PHP verifies the signed event — whether it came from a partner webhook or an internal action — and forwards it;</text>
+  <text x="700" y="574" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#374151">the realtime server validates the payload, resolves which Socket.IO rooms should receive it (tenant, user, or entity),</text>
+  <text x="700" y="593" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#374151">and pushes the update live — the browser re-renders the affected part of the page without a full reload.</text>
+</svg>
