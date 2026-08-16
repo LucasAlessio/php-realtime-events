@@ -4,7 +4,7 @@ import {
   useEntitySubscription,
   useRealtimeEvent,
   useRealtimeStatus,
-} from "@realtime-events/client-react";
+} from "@lucasalessio/realtime-events-client-react";
 import type { ClientEvent } from "@realtime-events/contracts";
 
 const SERVER_URL = import.meta.env["VITE_SERVER_URL"] ?? "http://localhost:4000";

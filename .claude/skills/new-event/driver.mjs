@@ -277,8 +277,8 @@ curl_exec($ch);
 ## Consumir no front (React)
 
 \`\`\`tsx
-import { useRealtimeEvent } from "@realtime-events/client-react";
-import type { ${pascal}Payload } from "@realtime-events/contracts";
+import { useRealtimeEvent } from "@lucasalessio/realtime-events-client-react";
+import type { ${pascal}Payload } from "@lucasalessio/realtime-events-client-react";
 
 useRealtimeEvent<${pascal}Payload>("${spec.type}", (event) => {
   // event.payload é ${pascal}Payload; event.audience NUNCA chega aqui

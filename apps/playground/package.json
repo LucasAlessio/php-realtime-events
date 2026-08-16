@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@realtime-events/client-react": "workspace:*",
+    "@lucasalessio/realtime-events-client-react": "workspace:*",
     "@realtime-events/contracts": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

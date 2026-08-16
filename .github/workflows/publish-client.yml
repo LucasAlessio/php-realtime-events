@@ -1,0 +1,34 @@
+name: publish-client
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@lucasalessio"
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @realtime-events/contracts run build
+
+      - run: pnpm --filter @lucasalessio/realtime-events-client-react run build
+
+      - run: pnpm --filter @lucasalessio/realtime-events-client-react publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

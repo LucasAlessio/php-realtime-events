@@ -154,6 +154,58 @@ curl_setopt_array($ch, [
 curl_exec($ch);
 ```
 
+## Instalando no front do projeto PHP
+
+O hook React (`RealtimeProvider` + `useRealtimeEvent` etc.) é publicado como
+um único pacote, `@lucasalessio/realtime-events-client-react`, no GitHub
+Packages deste repositório — ele já embute `@realtime-events/contracts`
+(schemas Zod, `ClientEvent`, `REALTIME_CHANNEL`), então não é preciso instalar
+nada além dele.
+
+1. No projeto PHP (na raiz, ao lado do `package.json` do front), crie/edite
+   `.npmrc`:
+
+   ```
+   @lucasalessio:registry=https://npm.pkg.github.com
+   //npm.pkg.github.com/:_authToken=${GITHUB_PACKAGES_TOKEN}
+   ```
+
+   Esse arquivo pode ir pro git — o token não fica no arquivo, só a
+   referência à variável de ambiente. `GITHUB_PACKAGES_TOKEN` é um PAT
+   clássico com escopo `read:packages`; exporte-o no ambiente de cada
+   desenvolvedor e nos secrets do CI/deploy do projeto PHP. **O GitHub
+   Packages exige autenticação mesmo para instalar** — sem o token, o
+   `npm install` falha com `401`, inclusive no build de deploy.
+
+2. Instale:
+
+   ```bash
+   npm i @lucasalessio/realtime-events-client-react
+   ```
+
+   Isso traz `socket.io-client` e `zod` como dependências transitivas;
+   `react >= 18` é peer dependency (usa o React que o projeto PHP já tem).
+
+3. O `tsconfig`/bundler do front precisa resolver o campo `exports` do
+   pacote — use `"moduleResolution": "bundler"` (ou `"node16"`/`"nodenext"`)
+   no `tsconfig.json`. Bundlers modernos (Vite, webpack 5) já fazem isso por
+   padrão.
+
+4. Checklist do lado do servidor Socket.IO (este repo) para o front do PHP
+   conseguir conectar:
+   - `CORS_ORIGINS` (`apps/server/src/config.ts`) precisa listar a origem do
+     front PHP — sem isso o handshake do Socket.IO é rejeitado.
+   - o PHP precisa expor `GET /api/realtime/token`, autenticado pela sessão
+     normal da aplicação, assinando o JWT com o mesmo `JWT_SECRET` (ver seção
+     seguinte). `apps/playground/vite.config.ts` tem uma implementação de
+     referência (dev-only) desse endpoint.
+
+Uso no código (ver a próxima seção para os detalhes de autenticação):
+
+```tsx
+import { RealtimeProvider, useRealtimeEvent, useEntitySubscription } from "@lucasalessio/realtime-events-client-react";
+```
+
 ## Autenticação do front
 
 O React se conecta usando um JWT curto (HS256, TTL de 10 min) que **o PHP
@@ -173,7 +225,7 @@ Claims esperadas no JWT (assinado com o mesmo `JWT_SECRET`):
 No front:
 
 ```tsx
-import { RealtimeProvider } from "@realtime-events/client-react";
+import { RealtimeProvider } from "@lucasalessio/realtime-events-client-react";
 
 async function getToken() {
   const res = await fetch("/api/realtime/token");
@@ -192,7 +244,7 @@ um token fixo, ele expira em minutos.
 Para assinar/atualizar uma parte específica da tela:
 
 ```tsx
-import { useRealtimeEvent, useEntitySubscription } from "@realtime-events/client-react";
+import { useRealtimeEvent, useEntitySubscription } from "@lucasalessio/realtime-events-client-react";
 
 function OrderPanel({ orderId }: { orderId: number }) {
   useEntitySubscription("order", orderId); // entra na sala da entidade
