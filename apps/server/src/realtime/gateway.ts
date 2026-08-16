@@ -11,7 +11,7 @@ import type { AuthenticatedSocketData } from "./types.js";
 
 export interface CreateGatewayDeps {
   httpServer: HttpServer;
-  jwtSecret: string;
+  jwtKey: Uint8Array;
   corsOrigins: string[];
   logger: Logger;
   redisUrl?: string;
@@ -49,7 +49,7 @@ export async function createGateway(deps: CreateGatewayDeps): Promise<Gateway> {
     io.adapter(await createRedisAdapter(deps.redisUrl, deps.logger));
   }
 
-  io.use(createAuthMiddleware({ jwtSecret: deps.jwtSecret, logger: deps.logger }));
+  io.use(createAuthMiddleware({ jwtKey: deps.jwtKey, logger: deps.logger }));
 
   io.on("connection", (socket) => {
     const { tenantId, userId } = socket.data;

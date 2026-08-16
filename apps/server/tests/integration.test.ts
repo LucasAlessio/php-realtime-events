@@ -18,8 +18,11 @@ import { createGateway } from "../src/realtime/gateway.js";
  */
 
 const HMAC_SECRET = "integration-test-hmac-secret-value";
-const JWT_SECRET = "integration-test-jwt-secret-value";
-const jwtKey = new TextEncoder().encode(JWT_SECRET);
+// Base64 (do jeito que o PHP compartilha o segredo em produção) — exercita o
+// mesmo caminho de decodificação que `config.ts#decodeJwtSecret` usa, não
+// só um texto puro tratado como bytes UTF-8.
+const JWT_SECRET = Buffer.from("integration-test-jwt-secret-value").toString("base64url");
+const jwtKey = Buffer.from(JWT_SECRET, "base64");
 
 const silentLogger: Logger = { info: () => {}, warn: () => {}, error: () => {} };
 
@@ -53,7 +56,7 @@ async function startTestServer(): Promise<TestServer> {
 
   const gateway = await createGateway({
     httpServer,
-    jwtSecret: JWT_SECRET,
+    jwtKey,
     corsOrigins: ["http://localhost:5173"],
     logger: silentLogger,
   });

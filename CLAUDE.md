@@ -45,8 +45,13 @@ gitignored); `.env.example` documents every variable. Both the server
 `scripts/emit.ts`) load this **root** `.env` explicitly via `dotenv`,
 regardless of which package's directory they run from — mind the relative
 path depth (`../../.env`, `../../../.env`) if you move files. `INGEST_HMAC_SECRET`
-and `JWT_SECRET` are required (min 16 chars, validated by Zod in
+and `JWT_SECRET` are required (min 16 chars/bytes, validated by Zod in
 `apps/server/src/config.ts`); everything else has a sane default.
+`JWT_SECRET` is shared with PHP as base64 and PHP signs with the *decoded*
+bytes, not the base64 string itself — `config.ts`'s `decodeJwtSecret()`
+mirrors that by default (`JWT_SECRET_ENCODING=base64`); set it to `utf8` for
+a plain-text secret. The playground's `vite.config.ts` duplicates the same
+decoding logic since it signs dev tokens standing in for PHP.
 
 ## Architecture
 
