@@ -1,9 +1,5 @@
+import { SUBSCRIBE_EVENT, UNSUBSCRIBE_EVENT, type SubscribePayload } from "@realtime-events/contracts";
 import { useEffect } from "react";
-import {
-  SUBSCRIBE_EVENT,
-  UNSUBSCRIBE_EVENT,
-  type SubscribePayload,
-} from "@realtime-events/contracts";
 import { useRealtimeContext } from "./RealtimeProvider.js";
 
 /**
@@ -13,16 +9,16 @@ import { useRealtimeContext } from "./RealtimeProvider.js";
  * reassina automaticamente sempre que o status volta a "connected".
  */
 export function useEntitySubscription(entityType: string, entityId: string | number): void {
-  const { socket, status } = useRealtimeContext();
+	const { socket, status } = useRealtimeContext();
 
-  useEffect(() => {
-    if (!socket || status !== "connected") return;
+	useEffect(() => {
+		if (!socket || status !== "connected") return;
 
-    const payload: SubscribePayload = { entityType, entityId };
-    socket.emit(SUBSCRIBE_EVENT, payload);
+		const payload: SubscribePayload = { entityType, entityId };
+		socket.emit(SUBSCRIBE_EVENT, payload);
 
-    return () => {
-      socket.emit(UNSUBSCRIBE_EVENT, payload);
-    };
-  }, [socket, status, entityType, entityId]);
+		return () => {
+			socket.emit(UNSUBSCRIBE_EVENT, payload);
+		};
+	}, [socket, status, entityType, entityId]);
 }

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import type { ClientEvent } from "@realtime-events/contracts";
+import { useEffect, useRef } from "react";
 import { useRealtimeContext } from "./RealtimeProvider.js";
 
 /**
@@ -13,16 +13,16 @@ import { useRealtimeContext } from "./RealtimeProvider.js";
  * chamamos a versão mais recente, então só re-assina quando `type` muda.
  */
 export function useRealtimeEvent<Payload = unknown>(
-  type: string,
-  handler: (event: ClientEvent<string, Payload>) => void,
+	type: string,
+	handler: (event: ClientEvent<string, Payload>) => void,
 ): void {
-  const { dispatcher } = useRealtimeContext();
-  const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+	const { dispatcher } = useRealtimeContext();
+	const handlerRef = useRef(handler);
+	handlerRef.current = handler;
 
-  useEffect(() => {
-    return dispatcher.on(type, (event) => {
-      handlerRef.current(event as ClientEvent<string, Payload>);
-    });
-  }, [dispatcher, type]);
+	useEffect(() => {
+		return dispatcher.on(type, event => {
+			handlerRef.current(event as ClientEvent<string, Payload>);
+		});
+	}, [dispatcher, type]);
 }

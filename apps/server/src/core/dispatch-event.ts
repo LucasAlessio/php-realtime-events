@@ -5,8 +5,8 @@ import type { EventPublisher } from "./publisher.js";
 import { resolveRooms } from "./resolve-rooms.js";
 
 export interface DispatchEventDeps {
-  publisher: EventPublisher;
-  logger: Logger;
+	publisher: EventPublisher;
+	logger: Logger;
 }
 
 /**
@@ -18,18 +18,15 @@ export interface DispatchEventDeps {
  * distinção é responsabilidade exclusiva do adapter de entrada que chama
  * esta função.
  */
-export async function dispatchEvent(
-  envelope: EnvelopeBase,
-  deps: DispatchEventDeps,
-): Promise<void> {
-  const rooms = resolveRooms(envelope.audience);
-  const clientEvent = registry.toClientEvent(envelope);
+export async function dispatchEvent(envelope: EnvelopeBase, deps: DispatchEventDeps): Promise<void> {
+	const rooms = resolveRooms(envelope.audience);
+	const clientEvent = registry.toClientEvent(envelope);
 
-  deps.logger.info("dispatching event", {
-    id: clientEvent.id,
-    type: clientEvent.type,
-    rooms,
-  });
+	deps.logger.info("dispatching event", {
+		id: clientEvent.id,
+		type: clientEvent.type,
+		rooms,
+	});
 
-  await deps.publisher.publish(rooms, clientEvent);
+	await deps.publisher.publish(rooms, clientEvent);
 }
