@@ -1,0 +1,8 @@
+**/dist/**
+**/coverage/**
+.env
+.env.example
+LICENSE
+**/skills/**/*.md
+**/*.yaml
+**/*.yml
