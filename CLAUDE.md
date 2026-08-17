@@ -27,12 +27,22 @@ pnpm build                            # build all workspace packages (topologica
 pnpm typecheck                        # build contracts first, then `tsc --noEmit` in every package
 pnpm lint                             # eslint . (flat config, typescript-eslint)
 pnpm format                           # prettier --write .
+pnpm format:check                     # prettier --check . (what CI runs; doesn't rewrite files)
 
 pnpm test                             # vitest run, whole repo
 pnpm test:watch                       # vitest watch mode
 pnpm vitest run path/to/file.test.ts  # run a single test file
 pnpm vitest run -t "test name"        # run tests matching a name
+
+pnpm verify                           # format:check + lint + typecheck + test, in that order
 ```
+
+Formatting is Prettier's job, not ESLint's — `eslint.config.js` loads
+`eslint-config-prettier` to turn off every stylistic rule so the two never
+fight. Don't add `@stylistic` rules to ESLint or bring in
+`eslint-plugin-prettier`; if a formatting rule needs to change, it belongs
+in `.prettierrc.json`. `.github/workflows/ci.yml` runs `pnpm verify`'s
+steps individually on push/PR.
 
 There's no top-level git repo yet (`git init` hasn't been run in this
 directory).
@@ -54,14 +64,14 @@ Ports & Adapters. The domain layer doesn't know HTTP or Socket.IO exist.
 
 ```
 [PHP webhook] --HTTP+HMAC--> POST /internal/emit ┐
-                                                  ├─> dispatchEvent (domain)
-                                                  │     resolve audience → rooms
-                                                  ▼
-                                           EventPublisher (port)
-                                                  │
-                                     SocketIoPublisher (adapter)
-                                                  │
-                                          [React browsers]
+																									├─> dispatchEvent (domain)
+																									│     resolve audience → rooms
+																									▼
+																					 EventPublisher (port)
+																									│
+																		 SocketIoPublisher (adapter)
+																									│
+																					[React browsers]
 ```
 
 ### Workspace layout
@@ -81,42 +91,42 @@ Ports & Adapters. The domain layer doesn't know HTTP or Socket.IO exist.
 
 - **`apps/server`** — the Socket.IO server, organized so `core/` never
   imports from `http/` or `realtime/`:
-  - `core/dispatch-event.ts` — the single use case: takes a validated
-    envelope, resolves target rooms, publishes via the `EventPublisher`
-    port, strips `audience` before it reaches the client.
-  - `core/resolve-rooms.ts` — audience → room-name translation. Rooms are
-    always tenant-scoped (`tenant:{id}`, `tenant:{id}:user:{id}`,
-    `tenant:{id}:{entityType}:{entityId}`). **Important precedence rule**:
-    `userIds` and `entity` are additive and narrow the audience; the
-    tenant-wide broadcast room is only used as a fallback when _neither_
-    is present. (This was a real bug caught by the integration test —
-    don't reintroduce a version where `entity` alone also broadcasts to
-    the whole tenant.)
-  - `http/ingest-route.ts` — `POST /internal/emit` handler. Reads the raw
-    body _before_ JSON-parsing (HMAC in `http/hmac.ts` signs raw bytes,
-    not the reserialized object). Batch validation is all-or-nothing: one
-    bad event in `{ events: [...] }` rejects the whole batch with `422`
-    and per-index errors.
-  - `realtime/auth.ts` — `io.use()` middleware validating the JWT
-    (HS256, claims `sub` → `userId`, `tenantId`) and attaching
-    `{ tenantId, userId }` to `socket.data`. Distinguishes `TOKEN_EXPIRED`
-    from `TOKEN_INVALID` in the error's `data.code`.
-  - `realtime/gateway.ts` — wires auth + subscription handlers, joins
-    tenant/user rooms on connect, and is the only place that constructs
-    the `SocketIoPublisher` (`io.to(rooms).emit(...)`). Also where the
-    Redis adapter gets attached if `REDIS_URL` is set.
-  - `realtime/subscriptions.ts` — `realtime:subscribe`/`realtime:unsubscribe`
-    handlers for entity rooms. Room names are always server-constructed
-    with the token's `tenantId` prefix — the client picks the entity, never
-    the tenant, so cross-tenant subscription isn't reachable even in
-    principle.
-  - `main.ts` — composition root. Note the `publisherBox` pattern: the
-    HTTP server needs an `EventPublisher` at construction time, but the
-    real publisher only exists after the Socket.IO gateway is created
-    _from_ that same HTTP server. A mutable box breaks the circularity.
-  - `logger.ts` — a tiny interface wrapping `console.*` as one-line JSON.
-    Deliberately not pino/winston (per project decision) — swapping the
-    implementation means editing this one file.
+    - `core/dispatch-event.ts` — the single use case: takes a validated
+      envelope, resolves target rooms, publishes via the `EventPublisher`
+      port, strips `audience` before it reaches the client.
+    - `core/resolve-rooms.ts` — audience → room-name translation. Rooms are
+      always tenant-scoped (`tenant:{id}`, `tenant:{id}:user:{id}`,
+      `tenant:{id}:{entityType}:{entityId}`). **Important precedence rule**:
+      `userIds` and `entity` are additive and narrow the audience; the
+      tenant-wide broadcast room is only used as a fallback when _neither_
+      is present. (This was a real bug caught by the integration test —
+      don't reintroduce a version where `entity` alone also broadcasts to
+      the whole tenant.)
+    - `http/ingest-route.ts` — `POST /internal/emit` handler. Reads the raw
+      body _before_ JSON-parsing (HMAC in `http/hmac.ts` signs raw bytes,
+      not the reserialized object). Batch validation is all-or-nothing: one
+      bad event in `{ events: [...] }` rejects the whole batch with `422`
+      and per-index errors.
+    - `realtime/auth.ts` — `io.use()` middleware validating the JWT
+      (HS256, claims `sub` → `userId`, `tenantId`) and attaching
+      `{ tenantId, userId }` to `socket.data`. Distinguishes `TOKEN_EXPIRED`
+      from `TOKEN_INVALID` in the error's `data.code`.
+    - `realtime/gateway.ts` — wires auth + subscription handlers, joins
+      tenant/user rooms on connect, and is the only place that constructs
+      the `SocketIoPublisher` (`io.to(rooms).emit(...)`). Also where the
+      Redis adapter gets attached if `REDIS_URL` is set.
+    - `realtime/subscriptions.ts` — `realtime:subscribe`/`realtime:unsubscribe`
+      handlers for entity rooms. Room names are always server-constructed
+      with the token's `tenantId` prefix — the client picks the entity, never
+      the tenant, so cross-tenant subscription isn't reachable even in
+      principle.
+    - `main.ts` — composition root. Note the `publisherBox` pattern: the
+      HTTP server needs an `EventPublisher` at construction time, but the
+      real publisher only exists after the Socket.IO gateway is created
+      _from_ that same HTTP server. A mutable box breaks the circularity.
+    - `logger.ts` — a tiny interface wrapping `console.*` as one-line JSON.
+      Deliberately not pino/winston (per project decision) — swapping the
+      implementation means editing this one file.
 
 - **`packages/client-react`** — `RealtimeProvider` owns the socket
   lifecycle; `getToken` is re-invoked on every (re)connection attempt, so
