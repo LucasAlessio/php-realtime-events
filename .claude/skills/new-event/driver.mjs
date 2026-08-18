@@ -37,6 +37,7 @@ function fail(message) {
 function segments(type) {
 	const parts = type.split(".").filter(Boolean);
 	if (parts.length < 1) fail(`type inválido: "${type}"`);
+
 	return parts;
 }
 
@@ -46,11 +47,13 @@ function toKebab(type) {
 
 function toCamel(type) {
 	const [first, ...rest] = segments(type);
+
 	return first + rest.map(s => s[0].toUpperCase() + s.slice(1)).join("");
 }
 
 function toPascal(type) {
 	const camel = toCamel(type);
+
 	return camel[0].toUpperCase() + camel.slice(1);
 }
 
@@ -61,11 +64,13 @@ function toPascal(type) {
 function readSpec(specArg) {
 	const raw = specArg === "-" ? readFileSync(0, "utf8") : readFileSync(specArg, "utf8");
 	let spec;
+
 	try {
 		spec = JSON.parse(raw);
 	} catch (err) {
 		fail(`spec não é JSON válido: ${err.message}`);
 	}
+
 	if (!spec.type || typeof spec.type !== "string") fail('spec.type é obrigatório (string, ex: "invoice.paid")');
 	if (!/^[a-z0-9]+(\.[a-z0-9]+)+$/.test(spec.type)) {
 		fail(`spec.type deve ser "dominio.acao" em minúsculas (recebido: "${spec.type}")`);
@@ -85,6 +90,7 @@ function readSpec(specArg) {
 		);
 	}
 	spec.v = spec.v ?? 1;
+
 	return spec;
 }
 
@@ -95,6 +101,7 @@ function readSpec(specArg) {
 function fieldZodExpr(field) {
 	const hasOptional = /\.optional\(\)\s*$/.test(field.zod.trim());
 	if (field.optional && !hasOptional) return `${field.zod}.optional()`;
+
 	return field.zod;
 }
 
@@ -105,6 +112,7 @@ function renderEventFile(spec) {
 		.map(f => {
 			const expr = fieldZodExpr(f);
 			const comment = f.doc ? ` // ${f.doc}` : "";
+
 			return `  ${f.name}: ${expr},${comment}`;
 		})
 		.join("\n");
@@ -131,6 +139,7 @@ export const ${camel}Event = defineEvent({
 
 function sampleObjectLiteral(spec, indent = "  ") {
 	const lines = spec.fields.map(f => `${indent}${f.name}: ${JSON.stringify(f.sample)},`);
+
 	return `{\n${lines.join("\n")}\n${indent.slice(2)}}`;
 }
 
@@ -169,6 +178,7 @@ function buildSampleEnvelope(spec) {
 		const idField = spec.fields.find(f => f.name === spec.audience.entity.idFrom);
 		audience.entity = { type: spec.audience.entity.type, id: idField.sample };
 	}
+
 	return {
 		id: randomUUID(),
 		type: spec.type,
@@ -186,6 +196,7 @@ function describeAudienceRule(spec) {
 	if (a.entity) rooms.push(`\`tenant:${a.tenantId}:${a.entity.type}:{id}\` (assinantes da entidade)`);
 	if (rooms.length === 0)
 		rooms.push(`\`tenant:${a.tenantId}\` (broadcast — nem \`userIds\` nem \`entity\` presentes)`);
+
 	return rooms;
 }
 
@@ -294,19 +305,23 @@ function phpArrayLiteral(value, depth) {
 	if (Array.isArray(value)) {
 		if (value.length === 0) return "[]";
 		const items = value.map(v => `${pad}${phpScalar(v)},`).join("\n");
+
 		return `[\n${items}\n${closePad}]`;
 	}
 	if (value && typeof value === "object") {
 		const entries = Object.entries(value)
 			.map(([k, v]) => `${pad}'${k}' => ${phpArrayLiteral(v, depth + 1)},`)
 			.join("\n");
+
 		return `[\n${entries}\n${closePad}]`;
 	}
+
 	return phpScalar(value);
 }
 
 function phpScalar(value) {
 	if (typeof value === "string") return `'${value.replace(/'/g, "\\'")}'`;
+
 	return String(value);
 }
 
@@ -320,6 +335,7 @@ function parseEventsIndex(content) {
 	for (const m of content.matchAll(importRe)) {
 		events.push({ varName: m[1], file: m[2] });
 	}
+
 	return events;
 }
 
@@ -330,10 +346,9 @@ function renderEventsIndex(events) {
 		...sorted.map(e => `import { ${e.varName} } from "./${e.file}.js";`),
 	].join("\n");
 
-	const chain =
-		sorted.length <= 1
-			? `createRegistry()${sorted.map(e => `.register(${e.varName})`).join("")}`
-			: `createRegistry()\n${sorted.map(e => `  .register(${e.varName})`).join("\n")}`;
+	const chain = sorted.length <= 1
+		? `createRegistry()${sorted.map(e => `.register(${e.varName})`).join("")}`
+		: `createRegistry()\n${sorted.map(e => `  .register(${e.varName})`).join("\n")}`;
 
 	const exportLines = sorted.map(e => `export * from "./${e.file}.js";`).join("\n");
 
@@ -382,10 +397,10 @@ function patchEventsIndexRemove(file) {
 	writeFileSync(EVENTS_INDEX_FILE, renderEventsIndex(remaining));
 }
 
-function runPrettier(files) {
-	const prettier = path.join(ROOT, "node_modules/.bin/prettier");
-	if (!existsSync(prettier)) return; // best-effort — não falha o scaffold por isso
-	spawnSync(prettier, ["--write", ...files], { cwd: ROOT, stdio: "ignore" });
+function runEslintFix(files) {
+	const eslint = path.join(ROOT, "node_modules/.bin/eslint");
+	if (!existsSync(eslint)) return; // best-effort — não falha o scaffold por isso
+	spawnSync(eslint, ["--fix", "--no-warn-ignored", ...files], { cwd: ROOT, stdio: "ignore" });
 }
 
 // ---------------------------------------------------------------------------
@@ -411,16 +426,18 @@ function cmdScaffold(args) {
 
 	writeFileSync(eventFile, renderEventFile(spec));
 	writeFileSync(testFile, renderTestFile(spec));
-	writeFileSync(samplePath, JSON.stringify(buildSampleEnvelope(spec), null, 2) + "\n");
+	writeFileSync(samplePath, `${JSON.stringify(buildSampleEnvelope(spec), null, 2)}\n`);
 	writeFileSync(docPath, renderDoc(spec, samplePath));
 
 	patchEventsIndexAdd({ varName: `${toCamel(spec.type)}Event`, file: kebab });
 
 	// `renderTestFile` embute o objeto de exemplo cru dentro de uma chamada
 	// já indentada — a indentação interna sai errada até passar pelo
-	// prettier. Rodar aqui evita depender de o programador lembrar de
-	// `pnpm format` antes de olhar o diff.
-	runPrettier([eventFile, testFile, EVENTS_INDEX_FILE]);
+	// `eslint --fix` (regra `@stylistic/indent`). `samplePath` também precisa
+	// passar por aqui: `JSON.stringify(..., null, 2)` usa 2 espaços, mas
+	// `jsonc/indent` exige tab. Rodar aqui evita depender de o programador
+	// lembrar de `pnpm lint:fix` antes de olhar o diff.
+	runEslintFix([eventFile, testFile, EVENTS_INDEX_FILE, samplePath]);
 
 	const rel = p => path.relative(ROOT, p);
 	console.log("criado:");
