@@ -26,6 +26,12 @@ COPY apps/server/package.json apps/server/package.json
 COPY apps/playground/package.json apps/playground/package.json
 RUN pnpm install --frozen-lockfile
 
+# ---- dev: mesmas deps (com devDependencies), mas sem copiar o código-fonte
+# — o docker-compose.dev.yml monta o repo como bind mount por cima e roda
+# `pnpm dev` / `pnpm dev:playground` com hot-reload (tsx watch / vite) ----
+FROM deps AS dev
+CMD ["pnpm", "dev"]
+
 # ---- build: compila contracts (dependência) e o servidor ----
 FROM deps AS build
 COPY packages/contracts packages/contracts
