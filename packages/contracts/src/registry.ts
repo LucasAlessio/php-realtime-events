@@ -29,7 +29,8 @@ export type ParseEnvelopeError =
 	| { kind: "invalid_payload"; type: string; issues: z.ZodIssue[] };
 
 export type ParseEnvelopeResult<Def extends EventDefinition> =
-	{ ok: true; envelope: ParsedEnvelope<Def> } | { ok: false; error: ParseEnvelopeError };
+	| { ok: true; envelope: ParsedEnvelope<Def> }
+	| { ok: false; error: ParseEnvelopeError };
 
 /**
  * Catálogo de tipos de notificação conhecidos. É o ponto único de extensão:
@@ -50,6 +51,7 @@ export class EventRegistry<Defs extends EventDefinition = never> {
 			throw new Error(`Event type "${definition.type}" already registered.`);
 		}
 		this.definitions.set(definition.type, definition);
+
 		return this;
 	}
 
@@ -94,6 +96,7 @@ export class EventRegistry<Defs extends EventDefinition = never> {
 		}
 
 		const envelope = { ...base.data, payload: payload.data } satisfies ParsedEnvelope<typeof definition>;
+
 		return { ok: true, envelope: envelope satisfies ParsedEnvelope<Defs> };
 	}
 

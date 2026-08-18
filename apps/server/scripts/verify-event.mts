@@ -39,6 +39,7 @@ function parseArgs(argv: string[]): { samplePath: string } {
 	if (idx === -1 || !argv[idx + 1]) {
 		throw new Error("uso: verify-event.mts --sample <caminho-para-envelope.json>");
 	}
+
 	return { samplePath: argv[idx + 1]! };
 }
 
@@ -138,6 +139,7 @@ async function main(): Promise<void> {
 
 	let exitCode = 0;
 	let client: ClientSocket | undefined;
+
 	try {
 		const token = await signToken({ sub: userId, tenantId });
 		client = await connectClient(port, token);

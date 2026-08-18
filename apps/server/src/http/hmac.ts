@@ -5,6 +5,7 @@ const SIGNATURE_PREFIX = "sha256=";
 export function computeSignature(secret: string, timestamp: string, rawBody: string): string {
 	const hmac = createHmac("sha256", secret);
 	hmac.update(`${timestamp}.${rawBody}`);
+
 	return SIGNATURE_PREFIX + hmac.digest("hex");
 }
 
@@ -20,10 +21,7 @@ export interface VerifySignatureParams {
 
 export type VerifySignatureResult =
 	| { ok: true }
-	| {
-			ok: false;
-			reason: "missing_headers" | "malformed_timestamp" | "timestamp_out_of_range" | "invalid_signature";
-	  };
+	| { ok: false; reason: "missing_headers" | "malformed_timestamp" | "timestamp_out_of_range" | "invalid_signature" };
 
 /**
  * Verifica `X-Signature: sha256=<hmac>` sobre `${timestamp}.${rawBody}` e

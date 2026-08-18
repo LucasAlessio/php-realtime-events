@@ -31,6 +31,7 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps) {
 
 		if (!token) {
 			next(authError("Missing token", "TOKEN_INVALID"));
+
 			return;
 		}
 
@@ -41,6 +42,7 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps) {
 
 			if (!userId || (typeof tenantId !== "string" && typeof tenantId !== "number")) {
 				next(authError("Token is missing required claims", "TOKEN_INVALID"));
+
 				return;
 			}
 

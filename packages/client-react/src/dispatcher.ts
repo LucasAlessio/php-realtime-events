@@ -19,6 +19,7 @@ export class EventDispatcher {
 			this.handlers.set(type, set);
 		}
 		set.add(handler);
+
 		return () => {
 			set?.delete(handler);
 		};

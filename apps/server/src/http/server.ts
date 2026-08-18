@@ -28,11 +28,13 @@ export function createHttpServer(deps: CreateHttpServerDeps): HttpServer {
 
 		if (req.method === "GET" && url === "/healthz") {
 			sendJson(res, 200, { status: "ok" });
+
 			return;
 		}
 
 		if (req.method === "POST" && url === "/internal/emit") {
 			void handleIngestRequest(req, res, deps);
+
 			return;
 		}
 

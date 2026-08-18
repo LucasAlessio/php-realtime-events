@@ -83,5 +83,6 @@ export function useRealtimeContext(): RealtimeContextValue {
 	if (!ctx) {
 		throw new Error("useRealtimeContext must be used within a <RealtimeProvider>");
 	}
+
 	return ctx;
 }

@@ -27,6 +27,7 @@ function readRawBody(req: IncomingMessage, maxBytes: number): Promise<string> {
 			if (size > maxBytes) {
 				reject(new BodyTooLargeError());
 				req.destroy();
+
 				return;
 			}
 
@@ -68,14 +69,17 @@ export async function handleIngestRequest(
 	deps: IngestRouteDeps,
 ): Promise<void> {
 	let rawBody: string;
+
 	try {
 		rawBody = await readRawBody(req, deps.maxBodyBytes);
 	} catch (error) {
 		if (error instanceof BodyTooLargeError) {
 			sendJson(res, 413, { error: "payload_too_large" });
+
 			return;
 		}
 		sendJson(res, 400, { error: "malformed_request" });
+
 		return;
 	}
 
@@ -90,21 +94,24 @@ export async function handleIngestRequest(
 	if (!signatureResult.ok) {
 		deps.logger.warn("ingest signature rejected", { reason: signatureResult.reason });
 		sendJson(res, 401, { error: "invalid_signature", reason: signatureResult.reason });
+
 		return;
 	}
 
 	let parsedBody: unknown;
+
 	try {
 		parsedBody = JSON.parse(rawBody);
 	} catch {
 		sendJson(res, 400, { error: "invalid_json" });
+
 		return;
 	}
 
-	const isBatch =
-		typeof parsedBody === "object" &&
-		parsedBody !== null &&
-		Array.isArray((parsedBody as Record<string, unknown>).events);
+	const isBatch = typeof parsedBody === "object"
+		&& parsedBody !== null
+		&& Array.isArray((parsedBody as Record<string, unknown>).events);
+
 	const candidates: unknown[] = isBatch
 		? ((parsedBody as Record<string, unknown>).events as unknown[])
 		: [parsedBody];
@@ -114,17 +121,19 @@ export async function handleIngestRequest(
 
 	candidates.forEach((candidate, index) => {
 		const result = registry.parseEnvelope(candidate);
+
 		if (!result.ok) {
-			const type =
-				typeof candidate === "object" && candidate !== null
-					? ((candidate as Record<string, unknown>).type as string | undefined)
-					: undefined;
+			const type = typeof candidate === "object" && candidate !== null
+				? ((candidate as Record<string, unknown>).type as string | undefined)
+				: undefined;
+
 			errors.push({
 				index,
 				...(type !== undefined ? { type } : {}),
 				kind: result.error.kind,
 				message: describeError(result.error),
 			});
+
 			return;
 		}
 		accepted.push(result.envelope);
@@ -133,6 +142,7 @@ export async function handleIngestRequest(
 	if (errors.length > 0) {
 		deps.logger.warn("ingest validation rejected", { errors });
 		sendJson(res, 422, { errors });
+
 		return;
 	}
 

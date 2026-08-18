@@ -122,6 +122,7 @@ function buildEnvelope(options: CliOptions): Envelope {
 	if (options.file) {
 		const filePath = path.isAbsolute(options.file) ? options.file : path.join(REPO_ROOT, options.file);
 		const fileContent = JSON.parse(readFileSync(filePath, "utf8")) as Envelope;
+
 		return { ...fileContent, id: randomUUID(), occurredAt: new Date().toISOString() };
 	}
 
@@ -149,6 +150,7 @@ function buildEnvelope(options: CliOptions): Envelope {
 function computeSignature(secret: string, timestamp: string, rawBody: string): string {
 	const hmac = createHmac("sha256", secret);
 	hmac.update(`${timestamp}.${rawBody}`);
+
 	return `sha256=${hmac.digest("hex")}`;
 }
 

@@ -21,11 +21,13 @@ async function getToken(): Promise<string> {
 		throw new Error(`failed to fetch realtime token: ${response.status}`);
 	}
 	const data = (await response.json()) as { token: string };
+
 	return data.token;
 }
 
 function StatusBadge() {
 	const status = useRealtimeStatus();
+
 	return <span data-status={status}>{status}</span>;
 }
 

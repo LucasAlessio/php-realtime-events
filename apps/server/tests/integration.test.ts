@@ -119,10 +119,9 @@ function baseEnvelope(overrides: Record<string, unknown> = {}) {
 async function postEmit(port: number, body: unknown, options: { validSignature?: boolean } = {}): Promise<Response> {
 	const rawBody = JSON.stringify(body);
 	const timestamp = String(Math.floor(Date.now() / 1000));
-	const signature =
-		options.validSignature === false
-			? `sha256=${"0".repeat(64)}`
-			: computeSignature(HMAC_SECRET, timestamp, rawBody);
+	const signature = options.validSignature === false
+		? `sha256=${"0".repeat(64)}`
+		: computeSignature(HMAC_SECRET, timestamp, rawBody);
 
 	return fetch(`http://localhost:${port}/internal/emit`, {
 		method: "POST",

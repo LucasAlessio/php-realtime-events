@@ -29,7 +29,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
 	const result = configSchema.safeParse(env);
 	if (!result.success) {
 		const message = result.error.issues.map(issue => `${issue.path.join(".")}: ${issue.message}`).join("; ");
+
 		throw new Error(`Invalid environment configuration: ${message}`);
 	}
+
 	return result.data;
 }

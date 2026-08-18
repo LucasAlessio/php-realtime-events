@@ -12,11 +12,13 @@ type Ack = (response: { ok: boolean; error?: string }) => void;
 
 function isSubscribePayload(value: unknown): value is SubscribePayload {
 	if (typeof value !== "object" || value === null) return false;
+
 	const record = value as Record<string, unknown>;
+
 	return (
-		typeof record["entityType"] === "string" &&
-		record["entityType"].length > 0 &&
-		(typeof record["entityId"] === "string" || typeof record["entityId"] === "number")
+		typeof record["entityType"] === "string"
+		&& record["entityType"].length > 0
+		&& (typeof record["entityId"] === "string" || typeof record["entityId"] === "number")
 	);
 }
 
@@ -35,6 +37,7 @@ export function registerSubscriptionHandlers(
 	socket.on(SUBSCRIBE_EVENT, (payload: unknown, ack?: Ack) => {
 		if (!isSubscribePayload(payload)) {
 			ack?.({ ok: false, error: "invalid_payload" });
+
 			return;
 		}
 		const room = entityRoom(socket.data.tenantId, payload.entityType, payload.entityId);
@@ -46,6 +49,7 @@ export function registerSubscriptionHandlers(
 	socket.on(UNSUBSCRIBE_EVENT, (payload: unknown, ack?: Ack) => {
 		if (!isSubscribePayload(payload)) {
 			ack?.({ ok: false, error: "invalid_payload" });
+
 			return;
 		}
 		const room = entityRoom(socket.data.tenantId, payload.entityType, payload.entityId);
