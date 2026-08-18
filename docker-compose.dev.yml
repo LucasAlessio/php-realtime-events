@@ -1,0 +1,55 @@
+# Ambiente de desenvolvimento em Docker — para onboarding sem precisar
+# instalar Node/pnpm localmente. Diferente do docker-compose.yml (produção,
+# imagem imutável), aqui o repo é montado como bind mount e os serviços
+# rodam `pnpm dev` / `pnpm dev:playground` (tsx watch / vite) com
+# hot-reload de verdade.
+#
+# Uso:
+#   docker compose -f docker-compose.dev.yml up --build
+#
+# Requer um `.env` na raiz (copie de .env.example) com INGEST_HMAC_SECRET
+# e JWT_SECRET definidos.
+
+x-dev-volumes: &dev-volumes
+  # Monta o repo inteiro, mas "blinda" cada node_modules com um volume
+  # anônimo — assim os binários nativos instalados dentro do container
+  # (linux) nunca são sobrescritos pelos node_modules do host (mac/etc.),
+  # e persistem entre `up`/`down` sem precisar reinstalar a cada boot.
+  - .:/repo
+  - /repo/node_modules
+  - /repo/packages/contracts/node_modules
+  - /repo/packages/client-react/node_modules
+  - /repo/apps/server/node_modules
+  - /repo/apps/playground/node_modules
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    command: pnpm dev
+    working_dir: /repo
+    ports:
+      - "4000:4000"
+    env_file: .env
+    volumes: *dev-volumes
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  playground:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    command: pnpm dev:playground
+    working_dir: /repo
+    ports:
+      - "5173:5173"
+    env_file: .env
+    volumes: *dev-volumes
+    depends_on:
+      - server

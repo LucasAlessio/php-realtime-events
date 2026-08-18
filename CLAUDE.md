@@ -21,6 +21,7 @@ pnpm install                          # install all workspace deps
 
 pnpm dev                              # build contracts, then run the server (tsx watch), http://localhost:4000
 pnpm dev:playground                   # build contracts, then run the demo React app, http://localhost:5173
+pnpm dev:docker                       # same two, containerized (no local Node/pnpm needed) — see Docker section
 pnpm emit --type order.updated --orderId 123   # simulate the PHP webhook (HMAC-signs and POSTs /internal/emit)
 
 pnpm build                            # build all workspace packages (topological order)
@@ -179,3 +180,16 @@ resulting tree preserving relative structure — pnpm's workspace symlinks
 are relative, so they stay valid as long as the directory layout around
 them is copied too. If you touch the Dockerfile, keep that constraint in
 mind.
+
+`docker-compose.yml` (production) builds that runtime image from the
+`runtime` target. `docker-compose.dev.yml` is a separate, dev-only setup
+for onboarding without installing Node/pnpm locally: it builds the `dev`
+stage (deps installed, source not baked in), bind-mounts the whole repo,
+and runs `pnpm dev` / `pnpm dev:playground` (tsx watch / vite) for real
+hot-reload — `pnpm dev:docker` is the shortcut for
+`docker compose -f docker-compose.dev.yml up --build`. Each service
+shadows its `node_modules` directories with anonymous volumes (see the
+`x-dev-volumes` anchor) so the container's Linux-installed native
+binaries (esbuild, etc.) are never clobbered by the host's bind-mounted
+`node_modules`. Requires a root `.env` (copy from `.env.example`) — the
+same file both native `pnpm dev` and the containers read.

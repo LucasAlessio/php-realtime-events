@@ -10,6 +10,7 @@
     "build": "pnpm -r run build",
     "dev": "pnpm --filter @realtime-events/contracts run build && pnpm --filter @realtime-events/server run dev",
     "dev:playground": "pnpm --filter @realtime-events/contracts run build && pnpm --filter @realtime-events/playground run dev",
+    "dev:docker": "docker compose -f docker-compose.dev.yml up --build",
     "emit": "pnpm --filter @realtime-events/playground run emit",
     "test": "vitest run",
     "test:watch": "vitest",
