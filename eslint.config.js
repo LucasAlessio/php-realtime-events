@@ -50,6 +50,7 @@ export default defineConfig([
 			"no-useless-concat": "error",
 			"no-unused-expressions": ["error"],
 			"no-useless-escape": "warn",
+			"no-tabs": ["error", { allowIndentationTabs: true }],
 			"@stylistic/max-len": [
 				"error",
 				{
