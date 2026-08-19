@@ -138,15 +138,21 @@ Ports & Adapters. The domain layer doesn't know HTTP or Socket.IO exist.
       Deliberately not pino/winston (per project decision) — swapping the
       implementation means editing this one file.
 
-- **`packages/client-react`** — `RealtimeProvider` owns the socket
-  lifecycle; `getToken` is re-invoked on every (re)connection attempt, so
-  it must never be a fixed cached token. A single `socket.on("realtime:event")`
-  feeds an internal `EventDispatcher` (`dispatcher.ts`) that fans out by
-  `type` to whatever `useRealtimeEvent(type, handler)` calls are mounted —
-  this is why there's one Socket.IO listener total, not one per
-  notification type. `useEntitySubscription` re-subscribes whenever
-  `status` transitions back to `"connected"`, because Socket.IO rooms
-  don't survive a reconnect.
+- **`packages/client-react`** — published to GitHub Packages as
+  `@lucasalessio/realtime-events-client-react` (see `.github/workflows/publish-client.yml`,
+  triggered on GitHub release). It bundles `@realtime-events/contracts` into
+  its own output (`tsup.config.ts`: `noExternal` + `dts.resolve`) and
+  re-exports it from `index.ts`, so external consumers (the PHP project's
+  React front) install one package and get both the hooks and the event
+  types — `contracts` itself stays a private workspace-only package.
+  `RealtimeProvider` owns the socket lifecycle; `getToken` is re-invoked on
+  every (re)connection attempt, so it must never be a fixed cached token. A
+  single `socket.on("realtime:event")` feeds an internal `EventDispatcher`
+  (`dispatcher.ts`) that fans out by `type` to whatever
+  `useRealtimeEvent(type, handler)` calls are mounted — this is why there's
+  one Socket.IO listener total, not one per notification type.
+  `useEntitySubscription` re-subscribes whenever `status` transitions back
+  to `"connected"`, because Socket.IO rooms don't survive a reconnect.
 
 - **`apps/playground`** — not a package other code depends on; a
   throwaway-safe way to manually verify the pipeline. `vite.config.ts`

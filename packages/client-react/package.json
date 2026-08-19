@@ -1,14 +1,27 @@
 {
-	"name": "@realtime-events/client-react",
+	"name": "@lucasalessio/realtime-events-client-react",
 	"version": "0.1.0",
-	"private": true,
 	"type": "module",
-	"main": "./dist/index.js",
+	"license": "MIT",
+	"sideEffects": false,
+	"files": ["dist"],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/LucasAlessio/php-realtime-events.git",
+		"directory": "packages/client-react"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com",
+		"access": "restricted"
+	},
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
 		}
 	},
 	"scripts": {
@@ -20,10 +33,11 @@
 		"react": ">=18"
 	},
 	"dependencies": {
-		"@realtime-events/contracts": "workspace:*",
-		"socket.io-client": "^4.8.3"
+		"socket.io-client": "^4.8.1",
+		"zod": "^3.24.1"
 	},
 	"devDependencies": {
+		"@realtime-events/contracts": "workspace:*",
 		"@types/react": "^18.3.31",
 		"react": "^18.3.1",
 		"tsup": "^8.5.1",

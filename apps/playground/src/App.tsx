@@ -3,7 +3,7 @@ import {
 	useEntitySubscription,
 	useRealtimeEvent,
 	useRealtimeStatus,
-} from "@realtime-events/client-react";
+} from "@lucasalessio/realtime-events-client-react";
 import type { ClientEvent } from "@realtime-events/contracts";
 import { useState } from "react";
 
