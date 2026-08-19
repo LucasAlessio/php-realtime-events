@@ -13,8 +13,8 @@
 		"emit": "pnpm --filter @realtime-events/playground run emit",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"lint": "eslint . --max-warnings=0 && echo \"\\033[32m✓ Done\\033[0m\"",
-		"lint:fix": "eslint . --fix && echo \"\\033[32m✓ Fixed\\033[0m\"",
+		"lint": "pnpm --filter @realtime-events/contracts run build && eslint . --max-warnings=0 && echo \"\\033[32m✓ Done\\033[0m\"",
+		"lint:fix": "pnpm --filter @realtime-events/contracts run build && eslint . --fix && echo \"\\033[32m✓ Fixed\\033[0m\"",
 		"typecheck": "pnpm --filter @realtime-events/contracts run build && pnpm -r run typecheck",
 		"verify": "pnpm lint && pnpm typecheck && pnpm test"
 	},
