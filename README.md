@@ -182,13 +182,13 @@ No front:
 import { RealtimeProvider } from "@realtime-events/client-react";
 
 async function getToken() {
-  const res = await fetch("/api/realtime/token");
-  const { token } = await res.json();
-  return token;
+	const res = await fetch("/api/realtime/token");
+	const { token } = await res.json();
+	return token;
 }
 
 <RealtimeProvider url="https://realtime.example.com" getToken={getToken}>
-  <App />
+	<App />
 </RealtimeProvider>;
 ```
 
@@ -201,13 +201,13 @@ Para assinar/atualizar uma parte específica da tela:
 import { useRealtimeEvent, useEntitySubscription } from "@realtime-events/client-react";
 
 function OrderPanel({ orderId }: { orderId: number }) {
-  useEntitySubscription("order", orderId); // entra na sala da entidade
+	useEntitySubscription("order", orderId); // entra na sala da entidade
 
-  useRealtimeEvent("order.updated", (event) => {
-    if (event.payload.orderId === orderId) refetchOrder();
-  });
+	useRealtimeEvent("order.updated", event => {
+		if (event.payload.orderId === orderId) refetchOrder();
+	});
 
-  // ...
+	// ...
 }
 ```
 
@@ -223,26 +223,26 @@ Passo a passo manual, caso não esteja usando a skill:
 
 1. Crie `packages/contracts/src/events/<nome>.ts`:
 
-   ```ts
-   import { z } from "zod";
-   import { defineEvent } from "../registry.js";
+    ```ts
+    import { z } from "zod";
+    import { defineEvent } from "../registry.js";
 
-   export const invoicePaidPayloadSchema = z.object({
-     invoiceId: z.union([z.string(), z.number()]),
-   });
+    export const invoicePaidPayloadSchema = z.object({
+    	invoiceId: z.union([z.string(), z.number()]),
+    });
 
-   export const invoicePaidEvent = defineEvent({
-     type: "invoice.paid",
-     v: 1,
-     payload: invoicePaidPayloadSchema,
-   });
-   ```
+    export const invoicePaidEvent = defineEvent({
+    	type: "invoice.paid",
+    	v: 1,
+    	payload: invoicePaidPayloadSchema,
+    });
+    ```
 
 2. Registre em `packages/contracts/src/events/index.ts`:
 
-   ```ts
-   export const registry = createRegistry().register(orderUpdatedEvent).register(invoicePaidEvent);
-   ```
+    ```ts
+    export const registry = createRegistry().register(orderUpdatedEvent).register(invoicePaidEvent);
+    ```
 
 3. Rode `pnpm build` (ou `pnpm --filter @realtime-events/contracts dev` em watch).
 

@@ -7,5 +7,5 @@ import type { ClientEvent } from "@realtime-events/contracts";
  * o único adapter concreto hoje.
  */
 export interface EventPublisher {
-  publish(rooms: readonly string[], event: ClientEvent): Promise<void> | void;
+	publish(rooms: readonly string[], event: ClientEvent): Promise<void> | void;
 }

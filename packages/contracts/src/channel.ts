@@ -10,6 +10,6 @@ export const SUBSCRIBE_EVENT = "realtime:subscribe";
 export const UNSUBSCRIBE_EVENT = "realtime:unsubscribe";
 
 export interface SubscribePayload {
-  entityType: string;
-  entityId: string | number;
+	entityType: string;
+	entityId: string | number;
 }

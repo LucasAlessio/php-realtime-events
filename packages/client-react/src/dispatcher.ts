@@ -10,25 +10,26 @@ type Handler = (event: ClientEvent) => void;
  * um listener por tipo de notificação.
  */
 export class EventDispatcher {
-  private readonly handlers = new Map<string, Set<Handler>>();
+	private readonly handlers = new Map<string, Set<Handler>>();
 
-  on(type: string, handler: Handler): () => void {
-    let set = this.handlers.get(type);
-    if (!set) {
-      set = new Set();
-      this.handlers.set(type, set);
-    }
-    set.add(handler);
-    return () => {
-      set?.delete(handler);
-    };
-  }
+	on(type: string, handler: Handler): () => void {
+		let set = this.handlers.get(type);
+		if (!set) {
+			set = new Set();
+			this.handlers.set(type, set);
+		}
+		set.add(handler);
 
-  dispatch(event: ClientEvent): void {
-    const set = this.handlers.get(event.type);
-    if (!set) return;
-    for (const handler of set) {
-      handler(event);
-    }
-  }
+		return () => {
+			set?.delete(handler);
+		};
+	}
+
+	dispatch(event: ClientEvent): void {
+		const set = this.handlers.get(event.type);
+		if (!set) return;
+		for (const handler of set) {
+			handler(event);
+		}
+	}
 }

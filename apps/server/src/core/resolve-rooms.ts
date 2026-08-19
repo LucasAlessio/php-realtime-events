@@ -1,19 +1,15 @@
 import type { Audience } from "@realtime-events/contracts";
 
 export function tenantRoom(tenantId: string | number): string {
-  return `tenant:${tenantId}`;
+	return `tenant:${tenantId}`;
 }
 
 export function userRoom(tenantId: string | number, userId: string | number): string {
-  return `tenant:${tenantId}:user:${userId}`;
+	return `tenant:${tenantId}:user:${userId}`;
 }
 
-export function entityRoom(
-  tenantId: string | number,
-  entityType: string,
-  entityId: string | number,
-): string {
-  return `tenant:${tenantId}:${entityType}:${entityId}`;
+export function entityRoom(tenantId: string | number, entityType: string, entityId: string | number): string {
+	return `tenant:${tenantId}:${entityType}:${entityId}`;
 }
 
 /**
@@ -31,23 +27,23 @@ export function entityRoom(
  *    assinou aquela entidade — não soma o broadcast do tenant inteiro.
  */
 export function resolveRooms(audience: Audience): string[] {
-  const rooms = new Set<string>();
-  const hasUserIds = Boolean(audience.userIds && audience.userIds.length > 0);
-  const hasEntity = Boolean(audience.entity);
+	const rooms = new Set<string>();
+	const hasUserIds = Boolean(audience.userIds && audience.userIds.length > 0);
+	const hasEntity = Boolean(audience.entity);
 
-  if (hasUserIds) {
-    for (const userId of audience.userIds ?? []) {
-      rooms.add(userRoom(audience.tenantId, userId));
-    }
-  }
+	if (hasUserIds) {
+		for (const userId of audience.userIds ?? []) {
+			rooms.add(userRoom(audience.tenantId, userId));
+		}
+	}
 
-  if (audience.entity) {
-    rooms.add(entityRoom(audience.tenantId, audience.entity.type, audience.entity.id));
-  }
+	if (audience.entity) {
+		rooms.add(entityRoom(audience.tenantId, audience.entity.type, audience.entity.id));
+	}
 
-  if (!hasUserIds && !hasEntity) {
-    rooms.add(tenantRoom(audience.tenantId));
-  }
+	if (!hasUserIds && !hasEntity) {
+		rooms.add(tenantRoom(audience.tenantId));
+	}
 
-  return [...rooms];
+	return [...rooms];
 }
