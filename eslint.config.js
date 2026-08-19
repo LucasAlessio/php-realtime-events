@@ -14,19 +14,32 @@ const TS_FILES = ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"];
 const JSON_FILES = ["**/*.json", "**/*.jsonc", "**/*.json5"];
 const MD_FILES = ["**/*.md"];
 const YML_FILES = ["**/*.yaml", "**/*.yml"];
+const BROWSER_FILES = ["apps/playground/src/**/*.ts", "apps/playground/src/**/*.tsx"];
 
 export default defineConfig([
 	{
+		ignores: ["**/dist/**", "**/node_modules/**", "**/coverage/**"],
+	},
+	{
+		files: [...JS_FILES, ...TS_FILES],
+		ignores: BROWSER_FILES,
 		languageOptions: {
 			globals: {
 				...globals.node,
-				...globals.browser,
+				// Namespace de tipos do @types/node (usado em `NodeJS.ProcessEnv`
+				// etc.) — não é um global de runtime, mas o parser TS o trata como
+				// identificador, então `no-undef` precisa dele declarado aqui.
 				NodeJS: true,
-			}
-		}
+			},
+		},
 	},
 	{
-		ignores: ["**/dist/**", "**/node_modules/**", "**/coverage/**"],
+		files: BROWSER_FILES,
+		languageOptions: {
+			globals: {
+				...globals.browser,
+			},
+		},
 	},
 	{
 		files: [...JS_FILES, ...TS_FILES],
@@ -202,11 +215,6 @@ export default defineConfig([
 			},
 		},
 	},
-	// ---------------------------------------------------------------------
-	// JSON — antes formatado pelo Prettier; agora eslint-plugin-jsonc cobre
-	// tanto validação (chave duplicada, número inválido, etc.) quanto
-	// formatação (indentação, aspas), com `--fix`.
-	// ---------------------------------------------------------------------
 	{
 		// `extends` (não `...spread`) de propósito: os configs do jsonc/markdown
 		// vêm com entradas sem `files` (registro de plugin, regras "off" de
@@ -222,12 +230,10 @@ export default defineConfig([
 			"jsonc/array-bracket-spacing": ["error", "never"],
 		},
 	},
-	// ---------------------------------------------------------------------
-	// Markdown — @eslint/markdown é um linter de prosa (heading, links
-	// quebrados, tabelas), não um formatador. Sem processor, então blocos de
-	// código ```bash/```js dentro dos .md não são relintados como JS.
-	// ---------------------------------------------------------------------
 	{
+		// Markdown — @eslint/markdown é um linter de prosa (heading, links
+		// quebrados, tabelas), não um formatador. Sem processor, então blocos de
+		// código ```bash/```js dentro dos .md não são relintados como JS.
 		files: MD_FILES,
 		extends: markdown.configs.recommended,
 		rules: {
@@ -236,12 +242,10 @@ export default defineConfig([
 			"markdown/fenced-code-language": "off",
 		},
 	},
-	// ---------------------------------------------------------------------
-	// HTML — só apps/playground/index.html. `flat/recommended` não vem
-	// escopado a `files`; sem isso o parser HTML seria aplicado a todo o
-	// projeto.
-	// ---------------------------------------------------------------------
 	{
+		// HTML — só apps/playground/index.html. `flat/recommended` não vem
+		// escopado a `files`; sem isso o parser HTML seria aplicado a todo o
+		// projeto.
 		files: ["**/*.html"],
 		...html.configs["flat/recommended"],
 		rules: {
