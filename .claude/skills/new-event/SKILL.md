@@ -99,7 +99,7 @@ This generates, all commented in Portuguese to match the codebase:
 | `packages/contracts/src/events/<kebab>.test.ts` | valid sample parses; an invalid payload is rejected; type is registered                                                                                     |
 | `.claude/skills/new-event/samples/<kebab>.json` | a complete, valid envelope — used by `verify` and as the exact reference for the PHP side                                                                   |
 | `docs/events/<kebab>.md`                        | payload field table, the resulting room names, the sample envelope, a ready PHP `curl`+HMAC snippet, and a `useRealtimeEvent<Pascal Payload>` React snippet |
-| `packages/contracts/src/events/index.ts`        | patched in place: import + `.register(...)` + `export *`, re-sorted alphabetically and reformatted with prettier                                            |
+| `packages/contracts/src/events/index.ts`        | patched in place: import + `.register(...)` + `export *`, re-sorted alphabetically and reformatted with `eslint --fix`                                      |
 
 If the type is already registered, `scaffold` fails loudly and writes
 nothing.
@@ -201,10 +201,10 @@ deliberately does **not** touch:
   isn't set through the nested `pnpm --filter` invocation the root `emit`
   script uses — so `emit.ts` resolves `--file` against a `REPO_ROOT`
   computed from `import.meta.url` instead of trusting cwd.
-- **Prettier may collapse a 2-entry `.register()` chain back onto one
-  line** if it fits under the configured print width — that's expected and
-  harmless; `renderEventsIndex` always emits the multi-line form first, and
-  the driver runs prettier over its own output before reporting done.
+- **The `.register()` chain stays multi-line** — `renderEventsIndex` always
+  emits the multi-line form, and unlike Prettier, `@stylistic`/ESLint has no
+  print-width-based reflow that would collapse it back onto one line
+  regardless of how short it ends up being.
 - **`entity` alone does not broadcast tenant-wide** — this is the bug the
   integration test was written to catch (`CLAUDE.md`); re-confirm the
   audience answer with the user if their expectation sounds like "everyone

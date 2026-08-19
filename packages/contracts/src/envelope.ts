@@ -7,12 +7,12 @@ import { audienceSchema } from "./audience.js";
  * responsabilidade do registry (ver registry.ts).
  */
 export const envelopeBaseSchema = z.object({
-  id: z.string().uuid(),
-  type: z.string().min(1),
-  v: z.number().int().positive(),
-  occurredAt: z.string().datetime(),
-  audience: audienceSchema,
-  payload: z.unknown(),
+	id: z.string().uuid(),
+	type: z.string().min(1),
+	v: z.number().int().positive(),
+	occurredAt: z.string().datetime(),
+	audience: audienceSchema,
+	payload: z.unknown(),
 });
 
 export type EnvelopeBase = z.infer<typeof envelopeBaseSchema>;
@@ -22,9 +22,9 @@ export type EnvelopeBase = z.infer<typeof envelopeBaseSchema>;
  * cliente nunca veja para quem mais o evento foi endereçado.
  */
 export interface ClientEvent<Type extends string = string, Payload = unknown> {
-  id: string;
-  type: Type;
-  v: number;
-  occurredAt: string;
-  payload: Payload;
+	id: string;
+	type: Type;
+	v: number;
+	occurredAt: string;
+	payload: Payload;
 }

@@ -222,19 +222,25 @@ Claims esperadas no JWT (assinado com o mesmo `JWT_SECRET`):
 { "sub": "<userId>", "tenantId": "<tenantId>", "exp": ... }
 ```
 
+`JWT_SECRET` é compartilhado em base64, e o PHP deve assinar com os **bytes
+decodificados** desse valor — não com a string base64 em si
+(`base64_decode($secret)` antes de passar para a lib de JWT do PHP). Este
+servidor decodifica da mesma forma por padrão; veja `JWT_SECRET_ENCODING` em
+`.env.example` para desativar isso caso o segredo seja texto puro.
+
 No front:
 
 ```tsx
 import { RealtimeProvider } from "@lucasalessio/realtime-events-client-react";
 
 async function getToken() {
-  const res = await fetch("/api/realtime/token");
-  const { token } = await res.json();
-  return token;
+	const res = await fetch("/api/realtime/token");
+	const { token } = await res.json();
+	return token;
 }
 
 <RealtimeProvider url="https://realtime.example.com" getToken={getToken}>
-  <App />
+	<App />
 </RealtimeProvider>;
 ```
 
@@ -247,13 +253,13 @@ Para assinar/atualizar uma parte específica da tela:
 import { useRealtimeEvent, useEntitySubscription } from "@lucasalessio/realtime-events-client-react";
 
 function OrderPanel({ orderId }: { orderId: number }) {
-  useEntitySubscription("order", orderId); // entra na sala da entidade
+	useEntitySubscription("order", orderId); // entra na sala da entidade
 
-  useRealtimeEvent("order.updated", (event) => {
-    if (event.payload.orderId === orderId) refetchOrder();
-  });
+	useRealtimeEvent("order.updated", event => {
+		if (event.payload.orderId === orderId) refetchOrder();
+	});
 
-  // ...
+	// ...
 }
 ```
 
@@ -269,26 +275,26 @@ Passo a passo manual, caso não esteja usando a skill:
 
 1. Crie `packages/contracts/src/events/<nome>.ts`:
 
-   ```ts
-   import { z } from "zod";
-   import { defineEvent } from "../registry.js";
+    ```ts
+    import { z } from "zod";
+    import { defineEvent } from "../registry.js";
 
-   export const invoicePaidPayloadSchema = z.object({
-     invoiceId: z.union([z.string(), z.number()]),
-   });
+    export const invoicePaidPayloadSchema = z.object({
+    	invoiceId: z.union([z.string(), z.number()]),
+    });
 
-   export const invoicePaidEvent = defineEvent({
-     type: "invoice.paid",
-     v: 1,
-     payload: invoicePaidPayloadSchema,
-   });
-   ```
+    export const invoicePaidEvent = defineEvent({
+    	type: "invoice.paid",
+    	v: 1,
+    	payload: invoicePaidPayloadSchema,
+    });
+    ```
 
 2. Registre em `packages/contracts/src/events/index.ts`:
 
-   ```ts
-   export const registry = createRegistry().register(orderUpdatedEvent).register(invoicePaidEvent);
-   ```
+    ```ts
+    export const registry = createRegistry().register(orderUpdatedEvent).register(invoicePaidEvent);
+    ```
 
 3. Rode `pnpm build` (ou `pnpm --filter @realtime-events/contracts dev` em watch).
 
@@ -320,8 +326,9 @@ de build. Variáveis obrigatórias: `INGEST_HMAC_SECRET`, `JWT_SECRET` (ver
 ## Variáveis de ambiente
 
 Ver `.env.example` para a lista comentada. As obrigatórias são
-`INGEST_HMAC_SECRET` e `JWT_SECRET` (mínimo 16 caracteres); o resto tem
-default sensato para desenvolvimento.
+`INGEST_HMAC_SECRET` (mínimo 16 caracteres) e `JWT_SECRET` (mínimo 16 bytes
+depois de decodificado — ver `JWT_SECRET_ENCODING`); o resto tem default
+sensato para desenvolvimento.
 
 ## Testes
 

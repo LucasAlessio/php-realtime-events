@@ -1,28 +1,28 @@
 {
-  "name": "@realtime-events/playground",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "emit": "tsx scripts/emit.ts",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@lucasalessio/realtime-events-client-react": "workspace:*",
-    "@realtime-events/contracts": "workspace:*",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
-    "dotenv": "^16.4.7",
-    "jose": "^5.9.6",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
-    "vite": "^6.0.7"
-  }
+	"name": "@realtime-events/playground",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"emit": "tsx scripts/emit.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@lucasalessio/realtime-events-client-react": "workspace:*",
+		"@realtime-events/contracts": "workspace:*",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1"
+	},
+	"devDependencies": {
+		"@types/react": "^18.3.31",
+		"@types/react-dom": "^18.3.7",
+		"@vitejs/plugin-react": "^4.7.0",
+		"dotenv": "^16.6.1",
+		"jose": "^5.10.0",
+		"tsx": "^4.23.12",
+		"typescript": "^5.9.3",
+		"vite": "^6.4.3"
+	}
 }
