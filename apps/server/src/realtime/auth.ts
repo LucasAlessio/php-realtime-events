@@ -4,11 +4,9 @@ import type { Logger } from "../logger.js";
 import type { AuthenticatedSocketData } from "./types.js";
 
 export interface AuthMiddlewareDeps {
-	jwtSecret: string;
+	jwtKey: Uint8Array;
 	logger: Logger;
 }
-
-const textEncoder = new TextEncoder();
 
 /**
  * Middleware de handshake (`io.use`): valida o JWT curto emitido pelo PHP
@@ -20,15 +18,12 @@ const textEncoder = new TextEncoder();
  * para o cliente saber se vale a pena buscar um token novo e reconectar.
  */
 export function createAuthMiddleware(deps: AuthMiddlewareDeps) {
-	const key = textEncoder.encode(deps.jwtSecret);
-
 	return async function authMiddleware(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		socket: Socket<any, any, any, AuthenticatedSocketData>,
 		next: (err?: Error) => void,
 	): Promise<void> {
 		const token = socket.handshake.auth?.["token"] as string | undefined;
-
 		if (!token) {
 			next(authError("Missing token", "TOKEN_INVALID"));
 
@@ -36,7 +31,7 @@ export function createAuthMiddleware(deps: AuthMiddlewareDeps) {
 		}
 
 		try {
-			const { payload } = await jwtVerify(token, key, { algorithms: ["HS256"] });
+			const { payload } = await jwtVerify(token, deps.jwtKey, { algorithms: ["HS256"] });
 			const tenantId = payload["tenantId"];
 			const userId = payload.sub;
 

@@ -9,7 +9,16 @@ import { defineConfig, type Connect, type ViteDevServer } from "vite";
 loadEnvFile({ path: fileURLToPath(new URL("../../.env", import.meta.url)) });
 
 const jwtSecret = process.env["JWT_SECRET"] ?? "";
-const jwtKey = new TextEncoder().encode(jwtSecret);
+
+// Espelha `decodeJwtSecret` de apps/server/src/config.ts: o PHP compartilha
+// o segredo em base64 e assina com os bytes decodificados, não com os bytes
+// UTF-8 da própria string base64. Duplicado aqui (como scripts/emit.ts já
+// duplica o helper de HMAC do servidor) para o playground não depender do
+// pacote do servidor.
+const jwtSecretEncoding = (process.env["JWT_SECRET_ENCODING"] ?? "base64") === "utf8" ? "utf8" : "base64";
+const jwtKey = jwtSecretEncoding === "utf8"
+	? new TextEncoder().encode(jwtSecret)
+	: Buffer.from(jwtSecret.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""), "base64");
 
 /**
  * Stand-in para o endpoint `/api/realtime/token` que o PHP exporia em

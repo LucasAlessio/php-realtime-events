@@ -35,7 +35,7 @@ async function main(): Promise<void> {
 
 	const gateway = await createGateway({
 		httpServer,
-		jwtSecret: config.JWT_SECRET,
+		jwtKey: config.JWT_KEY,
 		corsOrigins: config.CORS_ORIGINS,
 		logger,
 		...(config.REDIS_URL !== undefined ? { redisUrl: config.REDIS_URL } : {}),
